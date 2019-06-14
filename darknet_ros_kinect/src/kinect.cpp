@@ -73,8 +73,8 @@ private:
 	void boundingboxes_callback(const darknet_ros_msgs::BoundingBoxes::ConstPtr & data) {
 		for (auto box : data->bounding_boxes) {
 			if (box.probability < 0.3) continue;
-
 			
+
 		}
 	}
 
@@ -83,7 +83,7 @@ private:
 };
 
 Darknet_Kinect::Darknet_Kinect() {
-	kinect_image = n.advertise<sensor_msgs::Image>("/tf_pose/kinect_image", 1);
+	kinect_image = n.advertise<sensor_msgs::Image>("/darknet/rgb/image_raw", 1);
 	point_cloud_data = n.subscribe("/camera/depth_registered/points", 1, &Darknet_Kinect::point_cloud_data_callback, this);
 }
 
