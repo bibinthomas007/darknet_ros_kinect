@@ -220,7 +220,7 @@ Darknet_Kinect::~Darknet_Kinect() {
 
 int main(int argc, char** argv) {
 
-	ros::init(argc, argv, "tfpose_ros_kinect");
+	ros::init(argc, argv, "Darknet_Kinect");
 
 	Darknet_Kinect kinect;
 
