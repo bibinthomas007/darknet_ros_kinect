@@ -103,6 +103,7 @@ public:
 			darknet_ros_kinect::ObjectPosition object_position;
 
 			object_position.probability = box.probability;
+			object_position.Class = box.Class;
 			image_x = (box.xmax + box.xmin) / 2;
 			image_y = (box.ymax + box.ymin) / 2;
 
@@ -124,6 +125,8 @@ public:
 		}
 		cv::imshow("objectW_result", color);
 		cv::waitKey(1);
+
+		object_position_data.publish(object_positions);
 	}
 
 private:
@@ -156,10 +159,10 @@ private:
 		return flag;
 	}
 
-	cv::Point3d get_real_point_data(pcl::PointCloud<pcl::PointXYZRGB> data, int width, cv::Point image) {
+	cv::Point3d get_real_point_data(pcl::PointCloud<pcl::PointXYZRGB> *data, int width, cv::Point image) {
 		double z = depth.at<double>(image.y, image.x);
 		if (!(z >= 0.4 && z <= 4.0)) return cv::Point3d(0.0, 0.0, 0.0);
-		auto point = data.points[width * image.y + image.x];
+		auto point = data->points[width * image.y + image.x];
 		return cv::Point3d(point.x, point.y, point.z);
 	}
 
@@ -167,7 +170,7 @@ private:
 		//areaは奇数に限る
 		if (area % 2 == 0) return true;
 		if (area == 1) {
-			*result = get_real_point_data(pc, width, cv::Point(image_center.x, image_center.y));
+			*result = get_real_point_data(&pc, width, cv::Point(image_center.x, image_center.y));
 			if (result->z == 0.0) return true;
 			return false;
 		}
@@ -182,9 +185,8 @@ private:
 		max.y = image_center.y + (int)(area / 2);
 
 		for (int y = min.y; y < max.y; ++y) {
-			printf("%d\n", y );
 			for (int x = min.x; x < max.x; ++x) {
-				tmp = get_real_point_data(pc, width, cv::Point(x, y));
+				tmp = get_real_point_data(&pc, width, cv::Point(x, y));
 				if (tmp.z == 0.0) continue;
 				sum.x += tmp.x;
 				sum.y += tmp.y;
@@ -192,8 +194,6 @@ private:
 				count++;
 			}
 		}
-
-		printf("%f\n", count );
 
 		if (count == 0) return true;
 
